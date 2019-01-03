@@ -1,0 +1,57 @@
+---
+- name: batch do LVM
+  hosts: all
+  gather_facts: no
+  vars:
+    lvmdata: "/data01"
+    vgname: "vg01"
+    pvname1: "/dev/vdb1"
+    lv1: "data01"
+    vgpath: "/dev/vg01/data01"
+  tasks:
+    - name: install ssh key
+      authorized_key:
+        user=root
+        key="{{lookup('file','/root/.ssh/id_rsa.pub')}}"
+        state=present
+    - name: format disk
+      script: /root/zhujz/batchlvm/batchformat.sh 
+    - name: delete /etc/yum.repos.d/*
+      file:
+        path: /etc/yum.repos.d/
+        state: absent     
+    - name: scp yum repo
+      copy:
+        src: /etc/yum.repos.d/CentOS-Base.repo
+        dest: /etc/yum.repos.d/
+    - name: yum install lvm
+      yum: 
+        name: lvm2
+        state: latest
+    - name: create pv,vg
+      lvg: 
+        vg: "{{ vgname }}"
+        pvs: "{{ item }}"
+      with_items:
+        - "{{ pvname1 }}"
+    - name: create lv
+      lvol:
+        vg: "{{ vgname }}"
+        lv: "{{ lv1 }}"
+        size: 100%FREE
+      ignore_errors: yes
+    - name: create fs
+      filesystem:
+       fstype: ext4
+       dev: "{{ vgpath }}"
+    - name: create directory
+      file: 
+       path: "{{ lvmdata }}"
+       state: directory
+    - name: mount dir
+      mount:
+       name: "{{ lvmdata }}"
+       src: "{{ vgpath }}"
+       fstype: ext4
+       opts: rw
+       state: mounted

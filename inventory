@@ -1,0 +1,4 @@
+[dev]
+140.0.188.222  ansible_ssh_user="root" ansible_ssh_pass="15080350375@zf" ansible_python_interpreter=/usr/bin/python2.7
+140.0.188.223  ansible_ssh_user="root" ansible_ssh_pass="15080350375@zf" ansible_python_interpreter=/usr/bin/python2.7
+140.0.188.224  ansible_ssh_user="root" ansible_ssh_pass="15080350375@zf" ansible_python_interpreter=/usr/bin/python2.7
